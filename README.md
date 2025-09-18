@@ -1,59 +1,64 @@
-OnlineRetailDB - SQL Project
-Project Overview
-This project implements a fictional online retail database system designed in Microsoft SQL Server. It covers customer and product management, order processing, inventory tracking, sales reporting, audit logging, and security controls essential for an e-commerce platform simulation.
+OnlineRetailDB – SQL Project
+Project Overview:
+OnlineRetailDB is a fictional online retail database system built on Microsoft SQL Server. It simulates the core functionalities of an e-commerce platform, including customer management, product cataloging, order processing, inventory tracking, sales reporting, audit logging, and database security controls.
 
-Database Structure
-Customers: Stores customer info and contact details.
+Database Structure:
+Customers: Stores customer information and contact details.
 
-Products: Catalog of products with price, stock, and category.
+Products: Catalog of products with price, stock, and category mapping.
 
-Categories: Product categories with descriptions.
+Categories: Defines product categories with descriptions.
 
-Orders: Customer orders with dates and total amounts.
+Orders: Records customer orders with order date and total amount.
 
-OrderItems: Products included in each order with quantity and purchase price.
+OrderItems: Line items of an order with quantity and purchase price.
 
-ChangeLog: Logs insert, update, and delete operations via triggers for audit purposes.
+ChangeLog: Captures inserts, updates, and deletes through triggers for auditing.
 
-Features
-Relational schema design with keys and foreign constraints.
+Features:
+Relational Schema with primary/foreign keys and constraints for data integrity.
 
-Sample data insertion for testing and demonstration.
+Sample Data Insertion for realistic testing and demonstration.
 
-More than 40 SQL queries for various reporting and analysis needs.
+SQL Queries: 40+ queries for analytics, KPIs, and reporting use cases.
 
-Triggers to automate audit logging of data changes.
+Triggers: Automatic audit logging for data changes.
 
-Clustered and non-clustered indexes for performance optimization.
+Indexes: Clustered and non-clustered indexes for improved performance.
 
-Views that simplify complex queries for reporting.
+Views: Simplified query access for common reporting needs.
 
-Role-Based Access Control (RBAC) with users, roles, and permissions management.
+Security: Role-Based Access Control (RBAC) with roles, users, and permission management.
 
-Skills Demonstrated
-Advanced SQL techniques including joins, aggregates, CTEs, and window functions.
+Skills Demonstrated:
+Writing advanced SQL queries (joins, subqueries, aggregates, CTEs, window functions).
 
-Database design and normalization with integrity enforcement.
+Database design and normalization with constraints and relationships.
 
-Implementation of triggers for automated auditing.
+Implementing triggers for automated auditing of transactions.
 
-Index creation to improve query performance.
+Index optimization for performance tuning.
 
-Creating views to enhance readability and reuse of query logic.
+Creating views for reusable and readable reporting.
 
-Managing database security through RBAC.
+Managing security and permissions using RBAC.
 
 Translating business requirements into database logic.
 
-Usage Instructions
-Run all SQL scripts in order on a SQL Server instance.
+Usage Instructions:
+Run all provided SQL scripts in sequence on Microsoft SQL Server.
 
-Load sample data to simulate e-commerce activity.
+Load the included sample data to simulate e-commerce activities.
 
-Execute provided queries and views for data exploration.
+Explore the queries and views for insights into sales, inventory, and customers.
 
-Test triggers by making insert/update/delete operations.
+Test the audit logging by performing insert, update, and delete operations.
 
-Manage user roles and permissions to enforce security.
+Experiment with role-based access to enforce permissions.
 
-Customize or extend schema and queries as needed.
+Extend or customize the schema and queries to fit additional use cases.
+
+Technologies Used
+Microsoft SQL Server
+
+T-SQL (DDL, DML, DCL)
