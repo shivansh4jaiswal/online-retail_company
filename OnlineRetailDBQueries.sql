@@ -423,38 +423,22 @@ ALTER TABLE OrderItems ADD CONSTRAINT FK_OrderItems_OrderID
 FOREIGN KEY (OrderID) REFERENCES Orders(OrderID);
 GO
 
-/*
-D. Indexes on OrderItems Table
-	1. Clustered Index on OrderItemID: Usually created with the primary key.
-	2. Non-Clustered Index on OrderID: To speed up queries filtering by OrderID.
-	3. Non-Clustered Index on ProductID: To speed up queries filtering by ProductID.
-*/
 
 -- Clustered Index on OrderItemID
 CREATE CLUSTERED INDEX IDX_OrderItems_OrderItemID
 ON OrderItems(OrderItemID);
 GO
 
--- Non-Clustered Index on OrderID: To speed up queries filtering by OrderID.
 CREATE NONCLUSTERED INDEX IDX_OrderItems_OrderID
 ON OrderItems(OrderID);
 GO
 
---  Non-Clustered Index on ProductID: To speed up queries filtering by ProductID.
 CREATE NONCLUSTERED INDEX IDX_OrderItems_ProductID
 ON OrderItems(ProductID);
 GO
 
 
-/*
 
-E. Indexes on Customers Table
-	1. Clustered Index on CustomerID: Usually created with the primary key.
-	2. Non-Clustered Index on Email: To speed up queries filtering by Email.
-	3. Non-Clustered Index on Country: To speed up queries filtering by Country.
-*/
-
--- Drop Foreign Key Constraint from Orders Table - CustomerID
 ALTER TABLE Orders DROP CONSTRAINT FK__Orders__Customer__403A8C7D;
 
 -- Clustered Index on CustomerID
@@ -462,12 +446,10 @@ CREATE CLUSTERED INDEX IDX_Customers_CustomerID
 ON Customers(CustomerID);
 GO
 
--- Non-Clustered Index on Email: To speed up queries filtering by Email.
 CREATE NONCLUSTERED INDEX IDX_Customers_Email
 ON Customers(Email);
 GO
 
---  Non-Clustered Index on Country: To speed up queries filtering by Country.
 CREATE NONCLUSTERED INDEX IDX_Customers_Country
 ON Customers(Country);
 GO
@@ -477,17 +459,7 @@ ALTER TABLE Orders ADD CONSTRAINT FK_Orders_CustomerID
 FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID);
 GO
 
-/*
-===============================
-Implementing Views
-===============================
 
-	Views are virtual tables that represent the result of a query. 
-	They can simplify complex queries and enhance security by restricting access to specific data.
-
-*/
-
--- View for Product Details: A view combining product details with category names.
 CREATE VIEW vw_ProductDeails AS
 SELECT p.ProductID, p.ProductName, p.Price, p.Stock, c.CategoryName
 FROM Products p INNER JOIN Categories c
@@ -497,7 +469,6 @@ GO
 -- Display product details with category names using view
 SELECT * FROM vw_ProductDeails;
 
--- View for Customer Orders : A view to get a summary of orders placed by each customer.
 CREATE VIEW vw_CustomerOrders 
 AS
 SELECT c.CustomerID, c.FirstName, c.LastName, COUNT(o.OrderID) AS TotalOrders,
@@ -510,7 +481,6 @@ GROUP BY c.CustomerID, c.FirstName, c.LastName;
 GO
 
 
--- View for Recent Orders: A view to display orders placed in the last 30 days.
 CREATE VIEW vw_RecentOrders 
 AS
 SELECT o.OrderID, o.OrderDate, c.CustomerID, c.FirstName, c.LastName,
@@ -521,34 +491,27 @@ INNER JOIN OrderItems oi ON o.OrderID = oi.OrderID
 GROUP BY o.OrderID, o.OrderDate, c.CustomerID, c.FirstName, c.LastName;
 GO
 
---Query 31: Retrieve All Products with Category Names
---Using the vw_ProductDetails view to get a list of all products along with their category names.
+
 SELECT * FROM vw_ProductDeails;
 
---Query 32: Retrieve Products within a Specific Price Range
---Using the vw_ProductDetails view to find products priced between $100 and $500.
+
 SELECT * FROM vw_ProductDeails WHERE Price BETWEEN 10 AND 500;
 
---Query 33: Count the Number of Products in Each Category
---Using the vw_ProductDetails view to count the number of products in each category.
+
 SELECT CategoryName, Count(ProductID) AS ProductCount
 FROM vw_ProductDeails GROUP BY CategoryName; 
 
---Query 34: Retrieve Customers with More Than 1 Orders
---Using the vw_CustomerOrders view to find customers who have placed more than 1 orders.
+
 SELECT * FROM vw_CustomerOrders WHERE TotalOrders > 1;
 
---Query 35: Retrieve the Total Amount Spent by Each Customer
---Using the vw_CustomerOrders view to get the total amount spent by each customer.
+
 SELECT CustomerID, FirstName, LastName, TotalAmount FROM vw_CustomerOrders
 ORDER BY TotalAmount DESC;
 
---Query 36: Retrieve Recent Orders Above a Certain Amount
---Using the vw_RecentOrders view to find recent orders where the total amount is greater than $1000.
+
 SELECT * FROM vw_RecentOrders WHERE OrderAmount > 1000;
 
---Query 37: Retrieve the Latest Order for Each Customer
---Using the vw_RecentOrders view to find the latest order placed by each customer.
+
 SELECT ro.OrderID, ro.OrderDate, ro.CustomerID, ro.FirstName, ro.LastName, ro.OrderAmount
 FROM vw_RecentOrders ro
 INNER JOIN 
@@ -558,12 +521,10 @@ ON ro.CustomerID = latest.CustomerID AND ro.OrderDate = latest.LatestOrderDate
 ORDER BY ro.OrderDate DESC;
 GO
 
---Query 38: Retrieve Products in a Specific Category
---Using the vw_ProductDetails view to get all products in a specific category, such as 'Electronics'.
+
 SELECT * FROM vw_ProductDeails WHERE CategoryName = 'Books';
 
---Query 39: Retrieve Total Sales for Each Category
---Using the vw_ProductDetails and vw_CustomerOrders views to calculate the total sales for each category.
+
 SELECT pd.CategoryName, SUM(oi.Quantity * p.Price) AS TotalSales
 FROM OrderItems oi
 INNER JOIN Products p ON oi.ProductID = p.ProductID
@@ -571,9 +532,7 @@ INNER JOIN vw_ProductDeails pd ON p.ProductID = pd.ProductID
 GROUP BY pd.CategoryName
 ORDER BY TotalSales DESC;
 
---Query 40: Retrieve Customer Orders with Product Details
---Using the vw_CustomerOrders and vw_ProductDetails views to get customer orders along with the details 
--- of the products ordered.
+
 SELECT co.CustomerID, co.FirstName, co.LastName, o.OrderID, o.OrderDate,
 pd.ProductName, oi.Quantity, pd.Price
 FROM Orders o 
@@ -582,21 +541,17 @@ INNER JOIN vw_ProductDeails pd ON oi.ProductID = pd.ProductID
 INNER JOIN vw_CustomerOrders co ON o.CustomerID = co.CustomerID
 ORDER BY o.OrderDate DESC;
 
---Query 41: Retrieve Top 5 Customers by Total Spending
---Using the vw_CustomerOrders view to find the top 5 customers based on their total spending.
+
 SELECT TOP 5 CustomerID, FirstName, LastName, TotalAmount 
 FROM vw_CustomerOrders ORDER BY TotalAmount DESC;
 
---Query 42: Retrieve Products with Low Stock
---Using the vw_ProductDetails view to find products with stock below a certain threshold, such as 10 units.
+
 SELECT * FROM vw_ProductDeails WHERE Stock < 50;
 
---Query 43: Retrieve Orders Placed in the Last 7 Days
---Using the vw_RecentOrders view to find orders placed in the last 7 days.
+
 SELECT * from vw_RecentOrders WHERE OrderDate >= DATEADD(DAY, -7, GETDATE());
 
---Query 44: Retrieve Products Sold in the Last Month
---Using the vw_RecentOrders view to find products sold in the last month.
+
 SELECT p.ProductID, p.ProductName, SUM(oi.Quantity) AS TotalSold
 FROM vw_RecentOrders ro
 INNER JOIN OrderItems oi ON ro.OrderID = oi.OrderID
@@ -605,70 +560,30 @@ WHERE ro.OrderDate >= DATEADD(MONTH, -1, GETDATE())
 GROUP BY p.ProductID, p.ProductName
 ORDER BY TotalSold DESC;
 
-/*
-=========================================================
-Implementing Security / Role-Based Access Control (RBAC)
-=========================================================
 
-To manage access control in SQL Server, you'll need to use a combination of SQL Server's security features, 
-such as logins, users, roles, and permissions. 
-
-Here's a step-by-step guide on how to do this:
-
-### Step 1: Create Logins
-----------------------------------
-			First, create logins at the SQL Server level. 
-			Logins are used to authenticate users to the SQL Server instance.
-*/
--- Create a login with SQL Server Authentication
 CREATE LOGIN SalesUser WITH PASSWORD = 'strongpassword';
 
-/*
-### Step 2: Create Users
-----------------------------------
-			Next, create users in the `OnlineRetailDB` database for each login. 
-			Users are associated with logins and are used to grant access to the database.
-*/
+
 USE OnlineRetailDB;
 GO
 
--- Create a user in the database for the SQL Server Login
 CREATE USER SalesUser FOR LOGIN SalesUser;
 
 
-/*
-### Step 3: Create Roles
-----------------------------------
-			Define roles in the database that will be used to group users with similar permissions. 
-			This helps simplify permission management.
-*/
--- Create roles in the database
+
 CREATE ROLE SalesRole;
 CREATE ROLE MarketingRole;
 
-/*
-### Step 4: Assign Users to Roles
-----------------------------------
-			Add the users to the appropriate roles.
-*/
--- Add users to roles
+
 EXEC sp_addrolemember 'SalesRole', 'SalesUser';
 
-/*
-### Step 5: Grant Permissions
-----------------------------------
-			Grant the necessary permissions to the roles based on the access requirements
-*/
--- GRANT SELECT permission on the Customers Table to the SalesRole
+
 GRANT SELECT ON Customers TO SalesRole;
 
--- GRANT INSERT permission on the Orders Table to the SalesRole
 GRANT INSERT ON Orders TO SalesRole;
 
--- GRANT UPDATE permission on the Orders Table to the SalesRole
 GRANT UPDATE ON Orders TO SalesRole;
 
--- GRANT SELECT permission on the Products Table to the SalesRole
 GRANT SELECT ON Products TO SalesRole;
 
 SELECT * FROM Customers;
@@ -682,136 +597,85 @@ VALUES (1, GETDATE(), 600);
 SELECT * FROM Products;
 DELETE FROM Products;
 
-/*
-### Step 6: Revoke Permissions (if needed)
-----------------------------------
-			If you need to revoke permissions, you can use the `REVOKE` statement.
-*/
--- REVOKE INSERT permission on the Orders to the SalesRole
+
 REVOKE INSERT ON Orders FROM SalesRole;
 
-/* 
-### Step 7: View Effective Permissions
-----------------------------------
-			You can view the effective permissions for a user using the query
-*/
+
 
 SELECT * FROM fn_my_permissions(NULL,'DATABASE');
 
 
-
-
-
-/*
-==================
-Summary
-==================
-	1. Create Logins: Authenticate users at the SQL Server level.
-	2. Create Users: Create users in the database for the logins.
-	3. Create Roles: Group users with similar permissions.
-	4. Assign Users to Roles: Add users to appropriate roles.
-	5. Grant Permissions: Grant necessary permissions to roles.
-	6. Revoke Permissions: Revoke permissions if needed.
-	7. View Effective Permissions: Check the effective permissions for users.
-*/
-
-/*
-	Here are 20 different scenarios for access control in SQL Server. 
-	These scenarios cover various roles and permissions that can be assigned to users 
-	in the `OnlineRetailDB` database.
-*/
-
---- Scenario 1: Read-Only Access to All Tables
 CREATE ROLE ReadOnlyRole;
 GRANT SELECT ON SCHEMA::dbo TO ReadOnlyRole;
 
---- Scenario 2: Data Entry Clerk (Insert Only on Orders and OrderItems)
 CREATE ROLE DataEntryClerk;
 GRANT INSERT ON Orders TO DataEntryClerk;
 GRANT INSERT ON OrderItems TO DataEntryClerk;
 
---- Scenario 3: Product Manager (Full Access to Products and Categories)
 CREATE ROLE ProductManagerRole;
 GRANT SELECT, INSERT, UPDATE, DELETE ON Products TO ProductManagerRole;
 GRANT SELECT, INSERT, UPDATE, DELETE ON Categories TO ProductManagerRole;
 
---- Scenario 4: Order Processor (Read and Update Orders)
 CREATE ROLE OrderProcessorRole;
 GRANT SELECT, UPDATE ON Orders TO OrderProcessorRole;
 
---- Scenario 5: Customer Support (Read Access to Customers and Orders)
 CREATE ROLE CustomerSupportRole;
 GRANT SELECT ON Customers TO CustomerSupportRole;
 GRANT SELECT ON Orders TO CustomerSupportRole;
 
---- Scenario 6: Marketing Analyst (Read Access to All Tables, No DML)
 CREATE ROLE MarketingAnalystRole;
 GRANT SELECT ON SCHEMA::dbo TO MarketingAnalystRole;
 
---- Scenario 7: Sales Analyst (Read Access to Orders and OrderItems)
 CREATE ROLE SalesAnalystRole;
 GRANT SELECT ON Orders TO SalesAnalystRole;
 GRANT SELECT ON OrderItems TO SalesAnalystRole;
 
---- Scenario 8: Inventory Manager (Full Access to Products)
 CREATE ROLE InventoryManagerRole;
 GRANT SELECT, INSERT, UPDATE, DELETE ON Products TO InventoryManagerRole;
 
---- Scenario 9: Finance Manager (Read and Update Orders)
 CREATE ROLE FinanceManagerRole;
 GRANT SELECT, UPDATE ON Orders TO FinanceManagerRole;
 
---- Scenario 10: Database Backup Operator (Backup Database)
 CREATE ROLE BackupOperatorRole;
 GRANT BACKUP DATABASE TO BackupOperatorRole;
 
---- Scenario 11: Database Developer (Full Access to Schema Objects)
 CREATE ROLE DatabaseDeveloperRole;
 GRANT CREATE TABLE, ALTER, DROP ON SCHEMA::dbo TO DatabaseDeveloperRole;
 
---- Scenario 12: Restricted Read Access (Read Only Specific Columns)
 CREATE ROLE RestrictedReadRole;
 GRANT SELECT (FirstName, LastName, Email) ON Customers TO RestrictedReadRole;
 
---- Scenario 13: Reporting User (Read Access to Views Only)
 CREATE ROLE ReportingRole;
 GRANT SELECT ON SalesReportView TO ReportingRole;
 GRANT SELECT ON InventoryReportView TO ReportingRole;
 
---- Scenario 14: Temporary Access (Time-Bound Access)
--- Grant access
+
 CREATE ROLE TempAccessRole;
 GRANT SELECT ON SCHEMA::dbo TO TempAccessRole;
 
--- Revoke access after the specified period
 REVOKE SELECT ON SCHEMA::dbo FROM TempAccessRole;
 
---- Scenario 15: External Auditor (Read Access with No Data Changes)
 CREATE ROLE AuditorRole;
 GRANT SELECT ON SCHEMA::dbo TO AuditorRole;
 DENY INSERT, UPDATE, DELETE ON SCHEMA::dbo TO AuditorRole;
 
---- Scenario 16: Application Role (Access Based on Application)
 CREATE APPLICATION ROLE AppRole WITH PASSWORD = 'StrongPassword1';
 GRANT SELECT, INSERT, UPDATE ON Orders TO AppRole;
 
---- Scenario 17: Role-Based Access Control (RBAC) for Multiple Roles 
--- Combine roles
+
 CREATE ROLE CombinedRole;
 EXEC sp_addrolemember 'SalesRole', 'CombinedRole';
 EXEC sp_addrolemember 'MarketingRole', 'CombinedRole';
 
---- Scenario 18: Sensitive Data Access (Column-Level Permissions)
 CREATE ROLE SensitiveDataRole;
 GRANT SELECT (Email, Phone) ON Customers TO SensitiveDataRole;
 
---- Scenario 19: Developer Role (Full Access to Development Database)
 CREATE ROLE DevRole;
 GRANT CONTROL ON DATABASE::OnlineRetailDB TO DevRole;
 
---- Scenario 20: Security Administrator (Manage Security Privileges)
 CREATE ROLE SecurityAdminRole;
 GRANT ALTER ANY LOGIN TO SecurityAdminRole;
 GRANT ALTER ANY USER TO SecurityAdminRole;
 GRANT ALTER ANY ROLE TO SecurityAdminRole;
+
 
